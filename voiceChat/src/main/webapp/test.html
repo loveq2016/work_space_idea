@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>chat</title>
+<script src="static/js/jquery-2.1.4.min.js"></script>
+<style type="text/css">
+</style>
+<script type="text/javascript">
+	// 服务器地址
+	var wsServer = 'ws://localhost:8081/voiceChat/coreSocket';
+	// websocket对象
+	var ws;
+	// 用户对象
+	var user = {
+		'id' : '001',
+		'username' : 'kam',
+		'session' : ''
+	};
+	var chat = {
+		// 初始化聊天对象
+		init : function() {
+			ws = new WebSocket(wsServer);
+			ws.onopen = function(evt) {
+				chat.onOpen(evt)
+			};
+			ws.onclose = function(evt) {
+				chat.onClose(evt)
+			};
+			ws.onmessage = function(evt) {
+				chat.onMessage(evt)
+			};
+			ws.onerror = function(evt) {
+				chat.onError(evt)
+			};
+
+			// 绑定发送按钮
+			$("#send").click(function() {
+				chat.sendMessage("kam:"+$("#message").val());
+			});
+		},
+		// 连接开启时触发
+		onOpen : function(evt) {
+			/* var msg = "connect to Endpoint successfully!"; */
+			ws.send("user:kam");
+		},
+		// 连接关闭时出发
+		onClose : function(evt) {
+
+		},
+		// 收到信息触发
+		onMessage : function(evt) {
+			var msg = evt.data;
+			alert(msg);
+		},
+		// 连接出错时触发
+		onError : function(evt) {
+			
+		},
+		// 发送消息
+		sendMessage : function(msg) {
+			ws.send(msg);
+		}
+	};
+	// jquery加载
+	$(document).ready(function() {
+		chat.init();
+	});
+</script>
+</head>
+<body>
+	<input type="text" id="message" />
+	<input type="button" value="send" id="send" />
+</body>
+</html>
