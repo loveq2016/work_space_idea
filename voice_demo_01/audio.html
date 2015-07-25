@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>audio</title>
+		<link rel="stylesheet" href="css/mui.min.css" />
+		<script type="text/javascript" src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+		<script>
+			 // 服务器地址
+			var wsServer = 'ws://192.168.1.51:8081/voiceChat/coreSocket';
+			 // websocket对象
+			var ws;
+			// 网络状态
+			var netStatus = true;
+			//聊天对象
+			var chat = {
+				
+				init: function() {
+					ws = new WebSocket(wsServer);
+					ws.onopen = function(evt) {
+						chat.onOpen(evt)
+					};
+					ws.onclose = function(evt) {
+						chat.onClose(evt)
+					};
+					ws.onmessage = function(evt) {
+						chat.onMessage(evt)
+					};
+					ws.onerror = function(evt) {
+						chat.onError(evt)
+					};
+					// 绑定发送按钮
+					$("#send").click(function() {
+						chat.sendMessage("kam:" + $("#message").val());
+					});
+				},
+				// 连接开启时触发
+				onOpen: function(evt) {
+					netStatus == true;
+				},
+				// 连接关闭时出发
+				onClose: function(evt) {
+					netStatus == false;
+				},
+				// 收到信息触发
+				onMessage: function(evt) {
+					var msg = evt.data;
+					alert(msg);
+				},
+				// 连接出错时触发
+				onError: function(evt) {
+					netStatus == false;
+				},
+				
+				// 发送消息
+				sendMessage: function(path) {
+					if(netStatus){
+							plus.io.resolveLocalFileSystemURL(path, function(entry) {
+						// 可通过entry对象操作test.html文件 
+						entry.file(function(file) {
+							var fileReader = new plus.io.FileReader();
+							var reader = new plus.io.FileReader();
+							reader.onloadend = function(e) {
+								// 获得文件数据
+								var data = e.target.result;
+								console.log(data);
+								// 发送数据
+								ws.send(data);
+							};
+							reader.readAsDataURL(file);
+							alert(file.size + '--' + file.name);
+						});
+					}, function(e) {
+						$("#hint").text("Resolve file URL failed: " + e.message);
+					});
+					}
+					else{
+						$("#hint").text("發送失敗，网络已断开... ...");
+					}
+				}
+			};
+			 // 录音对象
+			var r;
+			var record = {
+					// 初始化了录音对象
+					init: function() {
+						r = plus.audio.getRecorder();
+						// 绑定开始按钮
+						$("#start").click(function() {
+							record.startRecord();
+						});
+						// 绑定结束按钮
+						$("#stop").click(function() {
+							record.stopRecord();
+						});
+					},
+					// 开始录音
+					startRecord: function() {
+						$("#hint").text("正在錄音... ...");
+						r.record({
+							filename: "_doc/audio/"
+						}, function(path) {
+							chat.sendMessage(path);
+							$("#hint").text("錄音完成！ 地址：" + path);
+						}, function(e) {
+							$("#hint").text("录音失败: " + e.message);
+						});
+					},
+					// 结束录音
+					stopRecord: function() {
+						r.stop();
+					}
+				}
+				// jquery加載
+			$(document).ready(function() {
+				mui.plusReady(function() {
+					record.init();
+					chat.init();
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left mui-action-back"></a>
+			<h1 class="mui-title">audio</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<!-- 操作按钮 -->
+				<table width="100%;" style="text-align: center;">
+					<tr>
+						<td>
+							<button class="mui-btn" id="start">start</button>
+						</td>
+						<td>
+							<button class="mui-btn" id="stop">stop and send</button>
+						</td>
+					</tr>
+				</table>
+				<!-- 信息提示框 -->
+				<div class="mui-input-row" style="margin: 10px 5px;">
+					<textarea rows="5" placeholder="提示框" id="hint" style="color: red;"></textarea>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

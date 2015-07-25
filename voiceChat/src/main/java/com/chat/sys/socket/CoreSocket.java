@@ -1,5 +1,7 @@
 package com.chat.sys.socket;
 
+import com.chat.common.util.FileUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,28 +14,29 @@ import javax.websocket.server.ServerEndpoint;
 
 @ServerEndpoint("/coreSocket")
 public class CoreSocket {
-	private static Map<String, Session> map = new HashMap<String, Session>();
+    private static Map<String, Session> map = new HashMap<String, Session>();
 
-	@OnMessage
-	public void onMessage(String message, Session session) throws Exception {
-		String[] user = message.split(":");
-		String token = user[0];
-		if(token.equals("user")){
-			CoreSocket.map.put(user[1], session);
-		}else{
-			CoreSocket.map.get(token).getBasicRemote().sendText(user[1]);
-		}
-	}
+    /**
+     * 接收语音信息
+     * @param data
+     * @param session
+     * @throws Exception
+     */
+    @OnMessage
+    public void onMessage(String data, Session session) throws Exception {
+        FileUtil.save(data);
+        System.out.println(data);
+    }
 
-	@OnOpen
-	public void onOpen(Session session) {
-		System.out.println("WebSocket opened: " + session.getId());
-	}
+    @OnOpen
+    public void onOpen(Session session) {
+        System.out.println("WebSocket opened: " + session.getId());
+    }
 
-	@OnClose
-	public void onClose(CloseReason reason) {
-		System.out.println("Closing a WebSocket due to "
-				+ reason.getReasonPhrase());
-	}
+    @OnClose
+    public void onClose(CloseReason reason) {
+        System.out.println("Closing a WebSocket due to "
+                + reason.getReasonPhrase());
+    }
 
 }

@@ -25,6 +25,7 @@ public class CoreController {
         System.out.println("new message!");
         System.out.println("new message2!");
         System.out.println("change now!");
+        System.out.println("ok");
         return "index";
     }
 }
