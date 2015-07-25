@@ -13,10 +13,12 @@ public class FileUtil {
     // 保存上传文件
     public static void save(String data){
         DateFormat format=new SimpleDateFormat("yyyyMMddHHmm");
+
         // 截取文件类型
         String suffix = data.substring(data.indexOf('/')+1,data.indexOf(';'));
         String fileName = format.format(new Date()) +'.'+ suffix;
-        String filePath = "file\\"+suffix;
+        String filePath = "\\"+"file\\"+suffix;
+
         // 执行base64解码
         int index = data.indexOf(',');
         byte[] fileByte = Base64Util.decode(data.substring(index + 1));
@@ -27,7 +29,10 @@ public class FileUtil {
             e.printStackTrace();
         }
 
+        // 获得文件保存路径
         File f = new File(filePath, fileName);
+        String str = f.getAbsolutePath();
+        System.out.println("文件所在路径:"+str);
         if (!f.getParentFile().exists()) { // 如果该文件路径不存在就创建该路径
             f.getParentFile().mkdirs();
         }
